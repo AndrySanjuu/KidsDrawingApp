@@ -16,11 +16,26 @@ class DrawingView(context: Context, attrs: AttributeSet): View(context, attrs) {
     private var mBrushSize: Float = 0.toFloat()
     private var color = Color.BLACK
     private var canvas: Canvas? = null
-    private val mPatsh = ArrayList<CustomPath>()
+    private val mPaths = ArrayList<CustomPath>()
+    private val mUndoPath = ArrayList<CustomPath>()
 
 
     init{
         setUpDrawing()
+    }
+
+    fun onClickUndo(){
+        if (mPaths.size >0){
+            mUndoPath.add(mPaths.removeAt(mPaths.size -1))
+            invalidate()
+        }
+    }
+
+    fun onClickRevert(){
+        if (mUndoPath.size >0){
+            mPaths.add(mUndoPath.removeAt(mUndoPath.size -1))
+            invalidate()
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -37,7 +52,7 @@ class DrawingView(context: Context, attrs: AttributeSet): View(context, attrs) {
             canvas.drawBitmap(it, 0f,   0f, mCanvasPaint)
         }
 
-        for (path in mPatsh){
+        for (path in mPaths){
             mDrawPaint!!.strokeWidth = path.brushThickness
             mDrawPaint!!.color = path.color
             canvas.drawPath(path,mDrawPaint!!)
@@ -75,7 +90,7 @@ class DrawingView(context: Context, attrs: AttributeSet): View(context, attrs) {
                 }
             }
             MotionEvent.ACTION_UP -> {
-                mPatsh.add(mDrawPath!!)
+                mPaths.add(mDrawPath!!)
                 mDrawPath = CustomPath(color,mBrushSize)
             }
             else -> return false
